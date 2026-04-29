@@ -1,0 +1,15 @@
+{
+	"name": "adf-sp-devStreaming",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Enabled",
+			"editable": true
+		}
+	},
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "147973e8-7ff8-49e6-8c15-0d269ca0004b",
+		"tenantId": "d7bab856-dda5-41c4-87b1-ed00410abc02"
+	}
+}
