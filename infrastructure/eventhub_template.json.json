@@ -1,0 +1,141 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namespaces_speventsbooking_name": {
+            "defaultValue": "speventsbooking",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.EventHub/namespaces",
+            "apiVersion": "2025-05-01-preview",
+            "name": "[parameters('namespaces_speventsbooking_name')]",
+            "location": "centralindia",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard",
+                "capacity": 1
+            },
+            "properties": {
+                "platformCapabilities": {
+                    "confidentialCompute": {
+                        "mode": "Disabled"
+                    }
+                },
+                "geoDataReplication": {
+                    "maxReplicationLagDurationInSeconds": 0,
+                    "locations": [
+                        {
+                            "locationName": "centralindia",
+                            "roleType": "Primary"
+                        }
+                    ]
+                },
+                "minimumTlsVersion": "1.2",
+                "publicNetworkAccess": "Enabled",
+                "disableLocalAuth": false,
+                "zoneRedundant": true,
+                "isAutoInflateEnabled": false,
+                "maximumThroughputUnits": 0,
+                "kafkaEnabled": true
+            }
+        },
+        {
+            "type": "Microsoft.EventHub/namespaces/authorizationrules",
+            "apiVersion": "2025-05-01-preview",
+            "name": "[concat(parameters('namespaces_speventsbooking_name'), '/RootManageSharedAccessKey')]",
+            "location": "centralindia",
+            "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces', parameters('namespaces_speventsbooking_name'))]"
+            ],
+            "properties": {
+                "rights": [
+                    "Listen",
+                    "Manage",
+                    "Send"
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.EventHub/namespaces/eventhubs",
+            "apiVersion": "2025-05-01-preview",
+            "name": "[concat(parameters('namespaces_speventsbooking_name'), '/ridetopic')]",
+            "location": "centralindia",
+            "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces', parameters('namespaces_speventsbooking_name'))]"
+            ],
+            "properties": {
+                "messageTimestampDescription": {
+                    "timestampType": "LogAppend"
+                },
+                "retentionDescription": {
+                    "cleanupPolicy": "Delete",
+                    "retentionTimeInHours": 168
+                },
+                "messageRetentionInDays": 7,
+                "partitionCount": 1,
+                "status": "Active"
+            }
+        },
+        {
+            "type": "Microsoft.EventHub/namespaces/networkrulesets",
+            "apiVersion": "2025-05-01-preview",
+            "name": "[concat(parameters('namespaces_speventsbooking_name'), '/default')]",
+            "location": "centralindia",
+            "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces', parameters('namespaces_speventsbooking_name'))]"
+            ],
+            "properties": {
+                "publicNetworkAccess": "Enabled",
+                "defaultAction": "Allow",
+                "virtualNetworkRules": [],
+                "ipRules": [],
+                "trustedServiceAccessEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.EventHub/namespaces/eventhubs/authorizationrules",
+            "apiVersion": "2025-05-01-preview",
+            "name": "[concat(parameters('namespaces_speventsbooking_name'), '/ridetopic/ListenPolicy')]",
+            "location": "centralindia",
+            "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('namespaces_speventsbooking_name'), 'ridetopic')]",
+                "[resourceId('Microsoft.EventHub/namespaces', parameters('namespaces_speventsbooking_name'))]"
+            ],
+            "properties": {
+                "rights": [
+                    "Listen"
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.EventHub/namespaces/eventhubs/authorizationrules",
+            "apiVersion": "2025-05-01-preview",
+            "name": "[concat(parameters('namespaces_speventsbooking_name'), '/ridetopic/SendPolicy')]",
+            "location": "centralindia",
+            "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('namespaces_speventsbooking_name'), 'ridetopic')]",
+                "[resourceId('Microsoft.EventHub/namespaces', parameters('namespaces_speventsbooking_name'))]"
+            ],
+            "properties": {
+                "rights": [
+                    "Send"
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
+            "apiVersion": "2025-05-01-preview",
+            "name": "[concat(parameters('namespaces_speventsbooking_name'), '/ridetopic/$Default')]",
+            "location": "centralindia",
+            "dependsOn": [
+                "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('namespaces_speventsbooking_name'), 'ridetopic')]",
+                "[resourceId('Microsoft.EventHub/namespaces', parameters('namespaces_speventsbooking_name'))]"
+            ],
+            "properties": {}
+        }
+    ]
+}
